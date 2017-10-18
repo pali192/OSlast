@@ -1,5 +1,5 @@
 /* See COPYRIGHT for copyright information. */
-
+//ahoj
 #include <inc/x86.h>
 #include <inc/memlayout.h>
 #include <inc/kbdreg.h>
