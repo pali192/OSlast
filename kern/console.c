@@ -192,6 +192,7 @@ cga_putc(int c)
 	}
 
 	// What is the purpose of this?
+	// Ked je obrazovka plna, pohni sa o jeden riadok nadol, aby bolo vidno novsie info
 	if (crt_pos >= CRT_SIZE) {
 		int i;
 
