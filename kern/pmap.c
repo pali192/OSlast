@@ -233,15 +233,15 @@ mem_init(void)
 	// we just set up the mapping anyway.
 	// Permissions: kernel RW, user NONE
 	// Your code goes here:
-<<<<<<< HEAD
+//<<<<<<< HEAD
 
 	// Initialize the SMP-related parts of the memory map
 	mem_init_mp();
 
-=======
+//=======
 	boot_map_region(kern_pgdir, KERNBASE, -KERNBASE, 0, PTE_W);
 	 
->>>>>>> lab3
+//>>>>>>> lab3
 	// Check that the initial page directory has been set up correctly.
 	check_kern_pgdir();
 
@@ -638,7 +638,7 @@ mmio_map_region(physaddr_t pa, size_t size)
 	//
 	// Your code here:
 	//panic("mmio_map_region not implemented");
-	static uintptr_t base = MMIOBASE;
+	
 	size = ROUNDUP(pa+size, PGSIZE);
 	pa = ROUNDDOWN(pa, PGSIZE);
 	size -= pa;
