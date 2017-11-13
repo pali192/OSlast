@@ -165,6 +165,7 @@ mem_init(void)
 	// Your code goes here:
 	pages = (struct PageInfo*) boot_alloc(sizeof(struct PageInfo) * npages);
 
+
 	cprintf("npages %d\n", npages);
 	cprintf("npages_basemem %d\n", npages_basemem);
 	cprintf("npages %x\n", npages);
@@ -173,7 +174,7 @@ mem_init(void)
 	//////////////////////////////////////////////////////////////////////
 	// Make 'envs' point to an array of size 'NENV' of 'struct Env'.
 	// LAB 3: Your code here.
-
+	envs = (struct Env *) boot_alloc(sizeof(struct Env) * NENV);
 	//////////////////////////////////////////////////////////////////////
 	// Now that we've allocated the initial kernel data structures, we set
 	// up the list of free physical pages. Once we've done so, all further
@@ -207,7 +208,7 @@ mem_init(void)
 	//    - the new image at UENVS  -- kernel R, user R
 	//    - envs itself -- kernel RW, user NONE
 	// LAB 3: Your code here.
-
+	boot_map_region(kern_pgdir, UENVS, PTSIZE, PADDR(envs), PTE_U);
 	//////////////////////////////////////////////////////////////////////
 	// Use the physical memory that 'bootstack' refers to as the kernel
 	// stack.  The kernel stack grows down from virtual address KSTACKTOP.
@@ -299,10 +300,10 @@ page_init(void)
 		page_free_list = &pages[i];
 	}
 
-	int med = (int)ROUNDUP(((char*)pages) + (sizeof(struct PageInfo) * npages) - 		0xf0000000, PGSIZE)/PGSIZE;
+	int med = (int)ROUNDUP(((char*)envs) + (sizeof(struct Env) * NENV) - 		0xf0000000, PGSIZE)/PGSIZE;
 
 	//cprintf("pageinfo size %d\n", sizeof(struct PageInfo));
-	cprintf("%d\n", ((char*)pages) + (sizeof(struct PageInfo) * npages));
+	cprintf("%d\n", ((char*)envs) + (sizeof(struct Env) * NENV));
 	cprintf("med %d\n", med);
 
 	for (j=med; j<npages; j++) 
@@ -590,8 +591,33 @@ int
 user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 {
 	// LAB 3: Your code here.
+	uint32_t j;
 
+	cprintf("user_mem_check test va: %x, len: %x\n", va, len);
+
+	uint32_t zaciatok = (uint32_t) ROUNDDOWN(va, PGSIZE); 
+	uint32_t koniec = (uint32_t) ROUNDUP(va+len, PGSIZE);
+
+	for (j=(uint32_t)zaciatok; j<koniec; j+=PGSIZE) 
+	{
+		pte_t *pte_pointer = pgdir_walk(env->env_pgdir, (void*)j, 0);
+		//pprint(pte_pointer);
+
+		if ((j >= ULIM) || !pte_pointer || !(*pte_pointer & PTE_P) || ((*pte_pointer & perm) != perm)) 
+		{
+			//user_mem_check_addr = (j<(uint32_t)va?(uint32_t)va:j);
+			if( j < (uint32_t)va )
+				user_mem_check_addr = (uint32_t)va;
+			else
+				user_mem_check_addr = j;
+
+			return -E_FAULT;
+		}
+	}
+
+	cprintf("user_mem_check uspesne va: %x, len: %x\n", va, len);
 	return 0;
+
 }
 
 //
